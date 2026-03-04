@@ -1,0 +1,21 @@
+package edu.eci.MicroSpringBoot;
+
+import java.lang.reflect.*;
+
+public class ReflexionNavigator {
+
+    private static void printMembers(Member[] mbrs, String s) {
+        out.format("%s:%n", s);
+        for (Member mbr : mbrs) {
+            if (mbr instanceof Field)
+                out.format(" %s%n", ((Field)mbr).toGenericString());
+            else if (mbr instanceof Constructor)
+                out.format(" %s%n", ((Constructor)mbr).toGenericString());
+            else if (mbr instanceof Method)
+                out.format(" %s%n", ((Method)mbr).toGenericString());
+        }
+        if (mbrs.length == 0)
+            out.format(" -- No %s --%n", s);
+            out.format("%n");
+    }
+}
