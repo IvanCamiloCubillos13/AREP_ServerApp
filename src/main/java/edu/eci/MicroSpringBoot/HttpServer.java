@@ -1,4 +1,5 @@
 package edu.eci.MicroSpringBoot;
+
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,11 +18,16 @@ public class HttpServer {
     }
 
     private static String getContentType(String fileRequested) {
-        if (fileRequested.endsWith(".html") || fileRequested.endsWith(".htm")) return "text/html";
-        if (fileRequested.endsWith(".css")) return "text/css";
-        if (fileRequested.endsWith(".js")) return "text/javascript";
-        if (fileRequested.endsWith(".png")) return "image/png";
-        if (fileRequested.endsWith(".jpg") || fileRequested.endsWith(".jpeg")) return "image/jpeg";
+        if (fileRequested.endsWith(".html") || fileRequested.endsWith(".htm"))
+            return "text/html";
+        if (fileRequested.endsWith(".css"))
+            return "text/css";
+        if (fileRequested.endsWith(".js"))
+            return "text/javascript";
+        if (fileRequested.endsWith(".png"))
+            return "image/png";
+        if (fileRequested.endsWith(".jpg") || fileRequested.endsWith(".jpeg"))
+            return "image/jpeg";
         return "text/plain";
     }
 
@@ -35,9 +41,9 @@ public class HttpServer {
             System.exit(1);
         }
         Socket clientSocket = null;
-        boolean running=true;
-        while (running){
-                try {
+        boolean running = true;
+        while (running) {
+            try {
                 System.out.println("Listo para recibir ...");
                 clientSocket = serverSocket.accept();
             } catch (IOException e) {
@@ -58,7 +64,7 @@ public class HttpServer {
             while ((inputLine = in.readLine()) != null) {
                 System.out.println("Received: " + inputLine);
 
-                if(isFirstLine){
+                if (isFirstLine) {
                     String[] flTokens = inputLine.split(" ");
                     String method = flTokens[0];
                     String struripath = flTokens[1];
@@ -66,9 +72,9 @@ public class HttpServer {
 
                     URI uripath = new URI(struripath);
                     reqpath = uripath.getPath();
-                
-                    query = uripath.getQuery(); 
-                    
+
+                    query = uripath.getQuery();
+
                     isFirstLine = false;
                 }
 
@@ -79,23 +85,23 @@ public class HttpServer {
 
             WebMethod currentWm = endPoints.get(reqpath);
 
-            if(currentWm != null){
+            if (currentWm != null) {
                 HttpRequest req = new HttpRequest(query);
                 HttpResponse res = new HttpResponse();
 
                 outputLine = "HTTP/1.1 200 OK\r\n"
-                    + "Content-Type: text/html\r\n" 
-                    + "\r\n"
-                    + "<!DOCTYPE html>"
-                    + "<html>"
-                    + "<head>"
-                    + "<meta charset=\"UTF-8\">"
-                    + "<title>Title of the document</title>\n"
-                    + "</head>"
-                    + "<body>"
-                    + currentWm.execute(req, res) 
-                    + "</body>"
-                    + "</html>";
+                        + "Content-Type: text/html\r\n"
+                        + "\r\n"
+                        + "<!DOCTYPE html>"
+                        + "<html>"
+                        + "<head>"
+                        + "<meta charset=\"UTF-8\">"
+                        + "<title>Title of the document</title>\n"
+                        + "</head>"
+                        + "<body>"
+                        + currentWm.execute(req, res)
+                        + "</body>"
+                        + "</html>";
                 out.print(outputLine);
                 out.flush();
 
@@ -105,29 +111,38 @@ public class HttpServer {
                         if (reqpath.equals("/")) {
                             reqpath = "/index.html";
                         }
-                        
-                        Path filePath = Paths.get("target/classes" + staticFilesPath + reqpath);
-                        
+
+                        String basePath = HttpServer.class
+                                .getProtectionDomain()
+                                .getCodeSource()
+                                .getLocation()
+                                .toURI()
+                                .getPath();
+                        Path filePath = Paths.get(basePath + staticFilesPath + reqpath);
+                        System.out.println("Buscando archivo en: " + filePath);
+
                         if (Files.exists(filePath) && !Files.isDirectory(filePath)) {
                             byte[] fileBytes = Files.readAllBytes(filePath);
                             String contentType = getContentType(reqpath);
-                            
+
                             out.print("HTTP/1.1 200 OK\r\n");
                             out.print("Content-Type: " + contentType + "\r\n");
                             out.print("Content-Length: " + fileBytes.length + "\r\n");
                             out.print("\r\n");
                             out.flush();
-                            
+
                             clientSocket.getOutputStream().write(fileBytes);
-                            
+
                         } else {
-                            out.println("HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n<h1>404 File Not Found</h1>");
+                            out.println(
+                                    "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n<h1>404 File Not Found</h1>");
                         }
                     } catch (Exception e) {
                         out.println("HTTP/1.1 500 Internal Server Error\r\n\r\n");
                     }
                 } else {
-                    out.println("HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n<h1>No static folder configured</h1>");
+                    out.println(
+                            "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n<h1>No static folder configured</h1>");
                 }
             }
             out.close();
@@ -136,7 +151,7 @@ public class HttpServer {
         }
     }
 
-    public static void get(String path, WebMethod wm){
+    public static void get(String path, WebMethod wm) {
         endPoints.put(path, wm);
     }
 }
