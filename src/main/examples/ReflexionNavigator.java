@@ -4,6 +4,12 @@ import java.lang.reflect.*;
 
 public class ReflexionNavigator {
 
+    public static void main(String[] args){
+        Class c = hello.getClass();
+
+        printMembers(c.getDeclaredMethods, "Methods");
+    }
+
     private static void printMembers(Member[] mbrs, String s) {
         out.format("%s:%n", s);
         for (Member mbr : mbrs) {
